@@ -33,9 +33,14 @@ def logdir(tmpdir_factory):
         # Create temporary directory
         tmpdir = tmpdir_factory.mktemp(f"logdir_{name}")
 
-        # Extract archive
+        # Extract archive with filter for Python 3.14 compatibility
         with tarfile.open(archive_path, "r:gz") as tar:
-            tar.extractall(path=tmpdir)
+            # Use 'data' filter to safely extract (available in Python 3.12+)
+            try:
+                tar.extractall(path=tmpdir, filter="data")
+            except TypeError:
+                # Fallback for older Python versions
+                tar.extractall(path=tmpdir)
 
         # If there's only one directory in the extraction, return that directory
         contents = list(tmpdir.listdir())

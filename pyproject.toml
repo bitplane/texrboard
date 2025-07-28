@@ -10,7 +10,10 @@ requires-python = ">=3.10"
 
 dependencies = [
     "textual",
-    "textual-plot"
+    "textual-plot",
+    "tensorboard",
+    "pydantic",
+    "requests"
 ]
 
 [project.optional-dependencies]

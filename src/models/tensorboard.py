@@ -1,11 +1,15 @@
-from pydantic import BaseModel
-from typing import Dict, List, Optional
+from pydantic import BaseModel, RootModel
+from typing import Dict, List, Optional, Union
 
 
 # --- /data/environment ---
 class EnvironmentResponse(BaseModel):
+    version: str
     data_location: str
-    tensorboard_version: str
+    window_title: str
+    experiment_name: str
+    experiment_description: str
+    creation_time: float
 
 
 # --- /data/logdir ---
@@ -19,8 +23,10 @@ class RunsResponse(BaseModel):
 
 
 # --- /data/plugins_listing ---
-class PluginsListingResponse(BaseModel):
-    __root__: Dict[str, str]  # plugin_name -> path
+class PluginsListingResponse(RootModel[Dict[str, str]]):
+    """Plugin name -> path mapping."""
+
+    pass
 
 
 # --- /data/plugin/SCALAR/tags ---
@@ -29,8 +35,10 @@ class ScalarTagInfo(BaseModel):
     description: str
 
 
-class ScalarTagsResponse(BaseModel):
-    __root__: Dict[str, ScalarTagInfo]  # tag -> info
+class ScalarTagsResponse(RootModel[Dict[str, Dict[str, ScalarTagInfo]]]):
+    """Run -> tag -> info mapping."""
+
+    pass
 
 
 # --- /data/plugin/SCALAR/data ---
@@ -39,9 +47,18 @@ class ScalarDatum(BaseModel):
     step: int
     value: float
 
+    @classmethod
+    def from_array(cls, data: List[Union[float, int]]) -> "ScalarDatum":
+        """Create ScalarDatum from [wall_time, step, value] array."""
+        return cls(wall_time=data[0], step=data[1], value=data[2])
 
-class ScalarDataResponse(BaseModel):
-    __root__: List[ScalarDatum]
+
+class ScalarDataResponse(RootModel[List[List[Union[float, int]]]]):
+    """List of scalar data points as [wall_time, step, value] arrays."""
+
+    def as_scalar_data(self) -> List[ScalarDatum]:
+        """Convert to list of ScalarDatum objects."""
+        return [ScalarDatum.from_array(point) for point in self.root]
 
 
 # --- /data/plugin/images/tags ---
@@ -51,8 +68,10 @@ class ImageTagMeta(BaseModel):
     samples: int
 
 
-class ImageTagsResponse(BaseModel):
-    __root__: Dict[str, Dict[str, ImageTagMeta]]  # run -> tag -> meta
+class ImageTagsResponse(RootModel[Dict[str, Dict[str, ImageTagMeta]]]):
+    """Run -> tag -> meta mapping."""
+
+    pass
 
 
 # --- /data/plugin/images/images ---
@@ -64,8 +83,10 @@ class ImageMetadata(BaseModel):
     query: str
 
 
-class ImageDataResponse(BaseModel):
-    __root__: List[ImageMetadata]
+class ImageDataResponse(RootModel[List[ImageMetadata]]):
+    """List of image metadata."""
+
+    pass
 
 
 # --- /data/plugin/audio/tags ---
@@ -75,8 +96,10 @@ class AudioTagMeta(BaseModel):
     samples: int
 
 
-class AudioTagsResponse(BaseModel):
-    __root__: Dict[str, Dict[str, AudioTagMeta]]  # run -> tag -> meta
+class AudioTagsResponse(RootModel[Dict[str, Dict[str, AudioTagMeta]]]):
+    """Run -> tag -> meta mapping."""
+
+    pass
 
 
 # --- /data/plugin/audio/audio ---
@@ -87,13 +110,17 @@ class AudioMetadata(BaseModel):
     query: str
 
 
-class AudioDataResponse(BaseModel):
-    __root__: List[AudioMetadata]
+class AudioDataResponse(RootModel[List[AudioMetadata]]):
+    """List of audio metadata."""
+
+    pass
 
 
 # --- /data/plugin/distribution/tags ---
-class DistributionTagsResponse(BaseModel):
-    __root__: Dict[str, Dict[str, Dict]]  # run -> tag -> {}
+class DistributionTagsResponse(RootModel[Dict[str, Dict[str, Dict]]]):
+    """Run -> tag -> {} mapping."""
+
+    pass
 
 
 # --- /data/plugin/distribution/distributions ---
@@ -104,8 +131,10 @@ class DistributionDatum(BaseModel):
     bucket_limits: List[float]
 
 
-class DistributionDataResponse(BaseModel):
-    __root__: List[DistributionDatum]
+class DistributionDataResponse(RootModel[List[DistributionDatum]]):
+    """List of distribution data."""
+
+    pass
 
 
 # --- /data/plugin/graph/run_metadata ---
@@ -114,8 +143,10 @@ class RunMetadata(BaseModel):
     run: str
 
 
-class RunMetadataResponse(BaseModel):
-    __root__: List[RunMetadata]
+class RunMetadataResponse(RootModel[List[RunMetadata]]):
+    """List of run metadata."""
+
+    pass
 
 
 # --- /data/plugin/graph/graph ---
@@ -131,8 +162,10 @@ class TextTagMeta(BaseModel):
     samples: int
 
 
-class TextTagsResponse(BaseModel):
-    __root__: Dict[str, Dict[str, TextTagMeta]]  # run -> tag -> meta
+class TextTagsResponse(RootModel[Dict[str, Dict[str, TextTagMeta]]]):
+    """Run -> tag -> meta mapping."""
+
+    pass
 
 
 # --- /data/plugin/text/text ---
@@ -142,10 +175,14 @@ class TextDatum(BaseModel):
     text: str
 
 
-class TextDataResponse(BaseModel):
-    __root__: List[TextDatum]
+class TextDataResponse(RootModel[List[TextDatum]]):
+    """List of text data."""
+
+    pass
 
 
 # --- Generic fallback for unknown/custom plugins ---
-class GenericPluginResponse(BaseModel):
-    __root__: Dict[str, Optional[Dict]]
+class GenericPluginResponse(RootModel[Dict[str, Optional[Dict]]]):
+    """Generic plugin response."""
+
+    pass
