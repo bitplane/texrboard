@@ -4,3 +4,7 @@ __pycache__
 htmlcov
 dist
 coverage.json
+.agent-os
+*.gz
+*.log
+CLAUDE.md
