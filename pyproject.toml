@@ -8,6 +8,9 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.10"
 
+[project.scripts]
+textboard = "textual_board.app:main"
+
 dependencies = [
     "textual",
     "textual-plot",
