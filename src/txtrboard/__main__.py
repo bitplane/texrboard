@@ -3,7 +3,7 @@
 Command-line entry point for TextBoard.
 """
 
-from textual_board.cli import main
+from txtrboard.cli import main
 
 if __name__ == "__main__":
     main()

@@ -1,7 +1,7 @@
 import requests
 from typing import Optional, Dict
 from urllib.parse import urljoin
-from textual_board.models.tensorboard import (
+from txtrboard.models.tensorboard import (
     EnvironmentResponse,
     LogdirResponse,
     RunsResponse,

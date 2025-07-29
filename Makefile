@@ -3,7 +3,7 @@
 		pre-commit update-pre-commit
 
 
-PROJECT_NAME := textual-board
+PROJECT_NAME := txtrboard
 
 
 all: dev coverage  ## builds everything

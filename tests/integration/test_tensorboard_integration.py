@@ -1,4 +1,4 @@
-from textual_board.tensorboard_client import TensorBoardClient
+from txtrboard.client import TensorBoardClient
 
 
 class TestTensorBoardIntegration:

@@ -9,7 +9,7 @@ from textual.containers import Container, Vertical
 from textual.widgets import Static, Checkbox, Label
 from textual import log
 
-from textual_board.tensorboard_client import TensorBoardClient
+from txtrboard.client import TensorBoardClient
 
 
 class LeftPanel(Container):

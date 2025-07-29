@@ -8,8 +8,8 @@ Command-line interface for launching the TextBoard TUI application.
 import argparse
 import sys
 
-from textual_board.server import TensorBoardManager, extract_log_archive
-from textual_board.ui.app import TextBoardApp
+from txtrboard.server import TensorBoardManager, extract_log_archive
+from txtrboard.ui.app import TextBoardApp
 
 
 def main():

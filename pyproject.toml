@@ -1,5 +1,5 @@
 [project]
-name = "textual-board"
+name = "txtrboard"
 description = "Tensorboard for textual"
 version = "0.0.1"
 authors = [
@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.scripts]
-textboard = "textual_board.cli:main"
+textboard = "txtrboard.cli:main"
 
 [project.optional-dependencies]
 dev = [

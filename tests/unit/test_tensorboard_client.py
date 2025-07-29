@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch
 import requests
-from textual_board.tensorboard_client import (
+from txtrboard.client import (
     TensorBoardClient,
     TensorBoardConnectionError,
     TensorBoardAPIError,
@@ -27,7 +27,7 @@ class TestTensorBoardClient:
         client = TensorBoardClient("http://localhost:6006/")
         assert client.base_url == "http://localhost:6006"
 
-    @patch("src.textual_board.tensorboard_client.requests.Session.get")
+    @patch("txtrboard.client.requests.Session.get")
     def test_make_request_success(self, mock_get):
         """Test successful API request."""
         mock_response = Mock()
@@ -41,7 +41,7 @@ class TestTensorBoardClient:
         assert response == mock_response
         mock_get.assert_called_once_with("http://localhost:6006/data/test", params=None, timeout=10.0)
 
-    @patch("src.textual_board.tensorboard_client.requests.Session.get")
+    @patch("txtrboard.client.requests.Session.get")
     def test_make_request_with_params(self, mock_get):
         """Test API request with query parameters."""
         mock_response = Mock()
@@ -54,7 +54,7 @@ class TestTensorBoardClient:
 
         mock_get.assert_called_once_with("http://localhost:6006/data/test", params=params, timeout=10.0)
 
-    @patch("src.textual_board.tensorboard_client.requests.Session.get")
+    @patch("txtrboard.client.requests.Session.get")
     def test_connection_error_handling(self, mock_get):
         """Test handling of connection errors."""
         mock_get.side_effect = requests.exceptions.ConnectionError("Connection failed")
@@ -65,7 +65,7 @@ class TestTensorBoardClient:
 
         assert "Unable to connect to TensorBoard" in str(exc_info.value)
 
-    @patch("src.textual_board.tensorboard_client.requests.Session.get")
+    @patch("txtrboard.client.requests.Session.get")
     def test_timeout_error_handling(self, mock_get):
         """Test handling of timeout errors."""
         mock_get.side_effect = requests.exceptions.Timeout("Request timeout")
@@ -76,7 +76,7 @@ class TestTensorBoardClient:
 
         assert "Request timeout" in str(exc_info.value)
 
-    @patch("src.textual_board.tensorboard_client.requests.Session.get")
+    @patch("txtrboard.client.requests.Session.get")
     def test_http_error_handling(self, mock_get):
         """Test handling of HTTP errors."""
         mock_response = Mock()
@@ -89,7 +89,7 @@ class TestTensorBoardClient:
 
         assert "TensorBoard API error" in str(exc_info.value)
 
-    @patch("src.textual_board.tensorboard_client.requests.Session.get")
+    @patch("txtrboard.client.requests.Session.get")
     def test_get_environment(self, mock_get):
         """Test getting environment information."""
         mock_response = Mock()
@@ -111,7 +111,7 @@ class TestTensorBoardClient:
         assert env.data_location == "/tmp/logs"
         mock_get.assert_called_once_with("http://localhost:6006/data/environment", params=None, timeout=10.0)
 
-    @patch("src.textual_board.tensorboard_client.requests.Session.get")
+    @patch("txtrboard.client.requests.Session.get")
     def test_get_logdir(self, mock_get):
         """Test getting log directory."""
         mock_response = Mock()
@@ -125,7 +125,7 @@ class TestTensorBoardClient:
         assert logdir.logdir == "/tmp/tensorboard_logs"
         mock_get.assert_called_once_with("http://localhost:6006/data/logdir", params=None, timeout=10.0)
 
-    @patch("src.textual_board.tensorboard_client.requests.Session.get")
+    @patch("txtrboard.client.requests.Session.get")
     def test_get_runs(self, mock_get):
         """Test getting runs list."""
         mock_response = Mock()
@@ -139,7 +139,7 @@ class TestTensorBoardClient:
         assert runs.runs == ["train", "eval", "test"]
         mock_get.assert_called_once_with("http://localhost:6006/data/runs", params=None, timeout=10.0)
 
-    @patch("src.textual_board.tensorboard_client.requests.Session.get")
+    @patch("txtrboard.client.requests.Session.get")
     def test_get_scalar_tags(self, mock_get):
         """Test getting scalar tags for a run."""
         mock_response = Mock()
@@ -157,7 +157,7 @@ class TestTensorBoardClient:
             "http://localhost:6006/data/plugin/scalars/tags", params={"run": "train"}, timeout=10.0
         )
 
-    @patch("src.textual_board.tensorboard_client.requests.Session.get")
+    @patch("txtrboard.client.requests.Session.get")
     def test_get_scalar_data(self, mock_get):
         """Test getting scalar data for a run and tag."""
         mock_response = Mock()

@@ -12,10 +12,10 @@ from textual.app import App, ComposeResult
 from textual.widgets import Footer, TabbedContent, TabPane, Static, Button
 from textual import log
 
-from textual_board.tensorboard_client import TensorBoardClient, TensorBoardConnectionError
-from textual_board.server import TensorBoardManager
-from textual_board.ui.theme import register_themes, get_default_theme
-from textual_board.ui.left_panel import LeftPanel
+from txtrboard.client import TensorBoardClient, TensorBoardConnectionError
+from txtrboard.server import TensorBoardManager
+from txtrboard.ui.theme import register_themes, get_default_theme
+from txtrboard.ui.left_panel import LeftPanel
 
 
 class TextBoardApp(App):
@@ -84,6 +84,11 @@ class TextBoardApp(App):
 
     def cleanup(self):
         """Clean up resources."""
+        # Reset mouse cursor to fix terminal state
+        import os
+
+        os.system('printf "\\033[?25h\\033[0m"')  # Show cursor and reset colors
+
         if self.client:
             self.client.close()
         self.tb_manager.stop_server()
