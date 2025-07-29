@@ -1,13 +1,15 @@
-"""Message classes for TensorBoard update events.
+"""Message classes for TensorBoard events and UI interactions.
 
 This module contains Textual message classes used to communicate
-updates between the background poller and UI components.
+between UI components, the backend, and the app for both data updates
+and user interactions.
 """
 
 from textual.message import Message
 from typing import List
 
 
+# Backend data update messages
 class RunsListUpdated(Message):
     """Dispatched when the TensorBoard runs list changes.
 
@@ -41,4 +43,34 @@ class ConnectionStatusChanged(Message):
         """
         self.connected = connected
         self.error = error
+        super().__init__()
+
+
+# UI interaction messages
+class RefreshRequested(Message):
+    """Dispatched when the user clicks the refresh button.
+
+    This message bubbles up to the App which triggers an immediate
+    backend poll for fresh data.
+    """
+
+    def __init__(self) -> None:
+        """Initialize the refresh request message."""
+        super().__init__()
+
+
+class RefreshIntervalChanged(Message):
+    """Dispatched when the user changes the refresh interval setting.
+
+    This message bubbles up to the App which adjusts the polling
+    timer interval accordingly.
+    """
+
+    def __init__(self, interval: float) -> None:
+        """Initialize the refresh interval change message.
+
+        Args:
+            interval: New refresh interval in seconds
+        """
+        self.interval = interval
         super().__init__()
