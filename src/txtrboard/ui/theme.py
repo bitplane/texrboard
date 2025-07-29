@@ -21,6 +21,11 @@ TENSORBOARD_LIGHT = Theme(
     surface="#FFFFFF",  # White panels
     panel="#F5F5F5",  # Light gray panels
     dark=False,
+    variables={
+        "panel-light": "#FFFFFF",
+        "panel-dark": "#F5F5F5",
+        "panel-text": "#212121",
+    },
 )
 
 # TensorBoard-inspired dark theme
@@ -37,6 +42,11 @@ TENSORBOARD_DARK = Theme(
     surface="#1E1E1E",  # Dark panels
     panel="#2D2D2D",  # Lighter dark panels
     dark=True,
+    variables={
+        "panel-light": "#2D2D2D",
+        "panel-dark": "#1E1E1E",
+        "panel-text": "#E0E0E0",
+    },
 )
 
 

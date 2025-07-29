@@ -26,6 +26,17 @@ class TextBoardApp(App):
     # Load CSS from external file
     CSS_PATH = Path(__file__).parent / "app.tcss"
 
+    def get_theme_variable_defaults(self) -> dict[str, str]:
+        """Define custom theme variables."""
+        return {
+            "header-text": "#FFFFFF",
+            "header-bg": "#FF6F00",
+            "panel-light": "#FFFFFF",
+            "panel-dark": "#F5F5F5",
+            "panel-text": "#212121",
+            "panel-text-bright": "#FFFFFF",
+        }
+
     def __init__(self, server_url: Optional[str] = None):
         super().__init__()
         self.server_url = server_url
@@ -80,6 +91,12 @@ class TextBoardApp(App):
             if self.client:
                 left_panel = self.query_one(LeftPanel)
                 left_panel.update_runs(self.client)
+        elif event.button.id == "theme-btn":
+            # Toggle between light and dark themes
+            if self.theme == "tensorboard_dark":
+                self.theme = "tensorboard_light"
+            else:
+                self.theme = "tensorboard_dark"
 
     def on_tabs_tab_activated(self, event: Tabs.TabActivated) -> None:
         """Handle tab switching."""

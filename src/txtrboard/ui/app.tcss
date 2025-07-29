@@ -9,8 +9,8 @@ Screen {
 /* Header Styles */
 TextBoardHeader {
     height: 3;
-    background: $primary;
-    color: white;
+    background: $header-bg;
+    color: $header-text;
 }
 
 #header-content {
@@ -29,7 +29,7 @@ TextBoardHeader {
 #main-tabs {
     height: 3;
     padding: 1 3;
-    background: $primary;
+    background: $header-bg;
     width: 80%;
     layout: horizontal;
 }
@@ -39,8 +39,8 @@ TextBoardHeader {
 }
 
 #main-tabs Tab {
-    background: $primary;
-    color: white;
+    background: $header-bg;
+    color: $header-text;
     border: none;
     height: 1;
     padding: 0 2 0 0;
@@ -48,8 +48,8 @@ TextBoardHeader {
 }
 
 #main-tabs Tab.-active {
-    background: white;
-    color: $primary;
+    background: $panel-light;
+    color: $header-bg;
 }
 
 #right-controls {
@@ -57,15 +57,77 @@ TextBoardHeader {
     width: auto;
     height: 3;
     align: center middle;
+    padding: 1 2 0 2;
 }
 
 #right-controls Button {
     margin: 0 1;
-    padding: 0 0;
     min-width: 3;
-    height: 3;
-    color: white;
+    height: 2;
+    background: transparent;
+    color: $header-text;
     border: none;
+}
+
+#right-controls Button:hover {
+    text-style: bold;
+}
+
+#right-controls Button:focus {
+    border-bottom: solid $header-text;
+    color: $header-text;
+    background: transparent;
+    color: $header-text;
+}
+
+#right-controls Select {
+    width: 14;
+    height: 2;
+    margin: 0 1;
+    background: transparent;
+    color: $header-text;
+    border: none;
+}
+
+#right-controls Select SelectCurrent {
+    background: transparent;
+    color: $header-text;
+    border: none;
+}
+
+#right-controls SelectOverlay {
+    background: $surface;
+    color: $foreground;
+    border: none;
+    padding: 0;
+    margin-top: 0;
+}
+
+/* Specific styling for refresh-interval */
+#refresh-interval {
+    color: $header-text;
+    border: none;
+}
+
+#refresh-interval:focus {
+    border-bottom: solid $header-text;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+
+#refresh-interval SelectCurrent {
+    color: $header-text;
+    text-style: bold;
+    border: none;
+}
+
+#refresh-interval SelectCurrent .arrow {
+    color: $header-text;
+}
+
+#refresh-interval > .arrow {
+    color: $header-text;
 }
 
 
@@ -77,12 +139,15 @@ TextBoardHeader {
 /* Left Panel Styles */
 LeftPanel {
     width: 25%;
-    border-right: solid $primary;
+    background: $panel-light;
 }
 
 #context-controls {
-    height: 50%;
-    border-bottom: solid $primary;
+    height: auto;
+    border-right: none;
+    border-left: none;
+    border-top: none;
+    border-bottom: $panel-text 30%;
     padding: 1;
 }
 
@@ -106,6 +171,20 @@ LeftPanel {
 #content-area-graphs Static {
     width: 100%;
     height: 100%;
+}
+
+/* Footer Styles */
+Footer {
+    background: $header-bg;
+}
+
+FooterKey {
+    color: $header-text;
+    background: transparent;
+}
+
+FooterKey:hover {
+    background: $surface 20%;
 }
 
 /* Utility Classes */

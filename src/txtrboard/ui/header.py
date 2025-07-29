@@ -6,7 +6,7 @@ Custom header with app title on the left and control buttons on the right.
 
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
-from textual.widgets import Static, Button, Tabs, Tab
+from textual.widgets import Static, Button, Tabs, Tab, Select
 
 
 class RightControls(Container):
@@ -14,10 +14,15 @@ class RightControls(Container):
 
     def compose(self) -> ComposeResult:
         with Horizontal():
-            yield Static("30s", id="refresh-interval")  # Will become dropdown
-            yield Button("⟳", id="refresh-btn", variant="primary")
-            yield Button("⚙", id="settings-btn", variant="default")
-            yield Button("?", id="help-btn", variant="default")
+            yield Select(
+                [("5s", "5s"), ("10s", "10s"), ("30s", "30s"), ("1m", "1m"), ("5m", "5m")],
+                value="30s",
+                id="refresh-interval",
+                allow_blank=False,
+            )
+            yield Button("Refresh", id="refresh-btn", variant="primary")
+            yield Button("Settings", id="settings-btn", variant="default")
+            yield Button("Help", id="help-btn", variant="default")
 
 
 class HeaderTabs(Container):
@@ -43,7 +48,20 @@ class TextBoardHeader(Container):
                 yield Tab("HISTOGRAMS")
                 yield Tab("GRAPHS")
             with Horizontal(id="right-controls"):
-                yield Static("30s", id="refresh-interval")
-                yield Button("⟳", id="refresh-btn", variant="primary")
+                yield Select(
+                    [
+                        ("INACTIVE", "INACTIVE"),
+                        ("5s", "5s"),
+                        ("10s", "10s"),
+                        ("30s", "30s"),
+                        ("1m", "1m"),
+                        ("5m", "5m"),
+                    ],
+                    value="INACTIVE",
+                    id="refresh-interval",
+                    allow_blank=False,
+                )
+                yield Button("☀", id="theme-btn", variant="default")
+                yield Button("🗘", id="refresh-btn", variant="primary")
                 yield Button("⚙", id="settings-btn", variant="default")
-                yield Button("?", id="help-btn", variant="default")
+                yield Button("🛈", id="help-btn", variant="default")
