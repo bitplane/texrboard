@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch
 import requests
-from src.textual_board.tensorboard_client import (
+from textual_board.tensorboard_client import (
     TensorBoardClient,
     TensorBoardConnectionError,
     TensorBoardAPIError,

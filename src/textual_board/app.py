@@ -21,7 +21,7 @@ from textual.containers import Container, Horizontal, Vertical
 from textual.widgets import Footer, TabbedContent, TabPane, Static, Button, Checkbox, Label
 from textual import log
 
-from src.textual_board.tensorboard_client import TensorBoardClient, TensorBoardConnectionError
+from textual_board.tensorboard_client import TensorBoardClient, TensorBoardConnectionError
 
 
 def find_free_port() -> int:
