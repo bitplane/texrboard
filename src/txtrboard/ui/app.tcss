@@ -64,9 +64,11 @@ TextBoardHeader {
     margin: 0 1;
     min-width: 3;
     height: 2;
-    background: transparent;
+    background: $primary;
     color: $header-text;
     border: none;
+    text-style: none;
+    outline: none;
 }
 
 #right-controls Button:hover {
@@ -75,15 +77,14 @@ TextBoardHeader {
 
 #right-controls Button:focus {
     border-bottom: solid $header-text;
-    color: $header-text;
     background: transparent;
     color: $header-text;
 }
 
 #right-controls Select {
-    width: 14;
+    width: 12;
     height: 2;
-    margin: 0 1;
+    margin: 0 2;
     background: transparent;
     color: $header-text;
     border: none;
@@ -93,6 +94,7 @@ TextBoardHeader {
     background: transparent;
     color: $header-text;
     border: none;
+    text-align: left;
 }
 
 #right-controls SelectOverlay {
@@ -107,6 +109,7 @@ TextBoardHeader {
 #refresh-interval {
     color: $header-text;
     border: none;
+    padding: 0;
 }
 
 #refresh-interval:focus {
@@ -114,12 +117,13 @@ TextBoardHeader {
     border-top: none;
     border-left: none;
     border-right: none;
+    padding: 0;
 }
 
 #refresh-interval SelectCurrent {
     color: $header-text;
-    text-style: bold;
     border: none;
+    padding: 0;
 }
 
 #refresh-interval SelectCurrent .arrow {

@@ -61,7 +61,7 @@ class TextBoardHeader(Container):
                     id="refresh-interval",
                     allow_blank=False,
                 )
-                yield Button("☀", id="theme-btn", variant="default")
-                yield Button("🗘", id="refresh-btn", variant="primary")
-                yield Button("⚙", id="settings-btn", variant="default")
-                yield Button("🛈", id="help-btn", variant="default")
+                yield Button("☀", id="theme-btn")
+                yield Button("🗘", id="refresh-btn")
+                yield Button("⚙", id="settings-btn")
+                yield Button("🛈", id="help-btn")
