@@ -16,6 +16,7 @@ from txtrboard.client import TensorBoardClient, TensorBoardConnectionError
 from txtrboard.server import TensorBoardManager
 from txtrboard.ui.theme import register_themes, get_default_theme
 from txtrboard.ui.left_panel import LeftPanel
+from txtrboard.ui.header import TextBoardHeader
 
 
 class TextBoardApp(App):
@@ -34,20 +35,20 @@ class TextBoardApp(App):
         atexit.register(self.cleanup)
 
     def compose(self) -> ComposeResult:
-        # yield TextBoardHeader()  # TODO: Fix header visibility issue
+        yield TextBoardHeader()
         yield LeftPanel()
 
         with TabbedContent():
-            with TabPane("Scalars", id="scalars-tab"):
+            with TabPane("SCALARS", id="scalars-tab"):
                 yield Static("Scalar plots will go here", id="scalars-content")
 
-            with TabPane("Images", id="images-tab"):
+            with TabPane("IMAGES", id="images-tab"):
                 yield Static("Image displays will go here", id="images-content")
 
-            with TabPane("Histograms", id="histograms-tab"):
+            with TabPane("HISTOGRAMS", id="histograms-tab"):
                 yield Static("Histogram plots will go here", id="histograms-content")
 
-            with TabPane("Graphs", id="graphs-tab"):
+            with TabPane("GRAPHS", id="graphs-tab"):
                 yield Static("Graph visualization will go here", id="graphs-content")
 
         yield Footer()

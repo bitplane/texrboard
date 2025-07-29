@@ -1,6 +1,6 @@
 # the things that don't have output files or run every time
 .PHONY: help all install test dev coverage clean \
-		pre-commit update-pre-commit
+		pre-commit update-pre-commit fix-terminal
 
 
 PROJECT_NAME := txtrboard
@@ -33,6 +33,9 @@ dist: scripts/dist.sh ## build the distributable files
 
 release: scripts/release.sh ## publish to pypi
 	scripts/release.sh $(PROJECT_NAME)
+
+fix-terminal: scripts/fix-terminal.sh ## reset terminal state after TUI apps mess it up
+	scripts/fix-terminal.sh
 
 # Caching doesn't work if we depend on PHONY targets
 
