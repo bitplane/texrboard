@@ -1,47 +1,51 @@
+import pytest
 from txtrboard.client import TensorBoardClient
 
 
 class TestTensorBoardIntegration:
     """Integration tests using real TensorBoard server."""
 
-    def test_get_runs_from_server(self, tensorboard_server):
+    @pytest.mark.asyncio
+    async def test_get_runs_from_server(self, tensorboard_server):
         """Test fetching runs from live TensorBoard server."""
         server_url = tensorboard_server("tacotron2-melvyn-bragg")
 
-        with TensorBoardClient(server_url) as client:
-            runs = client.get_runs()
+        async with TensorBoardClient(server_url) as client:
+            runs = await client.get_runs()
 
             assert len(runs.runs) > 0
             assert isinstance(runs.runs, list)
             # The test data has run named '.'
             assert "." in runs.runs
 
-    def test_get_environment_from_server(self, tensorboard_server):
+    @pytest.mark.asyncio
+    async def test_get_environment_from_server(self, tensorboard_server):
         """Test fetching environment info from live TensorBoard server."""
         server_url = tensorboard_server("tacotron2-melvyn-bragg")
 
-        with TensorBoardClient(server_url) as client:
-            env = client.get_environment()
+        async with TensorBoardClient(server_url) as client:
+            env = await client.get_environment()
 
             assert hasattr(env, "version")
             assert hasattr(env, "data_location")
             assert isinstance(env.version, str)
             assert len(env.version) > 0
 
-    def test_get_scalar_data_from_server(self, tensorboard_server):
+    @pytest.mark.asyncio
+    async def test_get_scalar_data_from_server(self, tensorboard_server):
         """Test fetching scalar data from live TensorBoard server."""
         server_url = tensorboard_server("tacotron2-melvyn-bragg")
 
-        with TensorBoardClient(server_url) as client:
+        async with TensorBoardClient(server_url) as client:
             # First get available runs
-            runs = client.get_runs()
+            runs = await client.get_runs()
             assert len(runs.runs) > 0
 
             # Get the first run
             run_name = runs.runs[0]
 
             # Get scalar tags for this run
-            tags = client.get_scalar_tags(run_name)
+            tags = await client.get_scalar_tags(run_name)
             assert run_name in tags.root
 
             # Should have some scalar tags
@@ -50,7 +54,7 @@ class TestTensorBoardIntegration:
 
             # Get data for the first tag
             tag_name = list(run_tags.keys())[0]
-            data = client.get_scalar_data(run_name, tag_name)
+            data = await client.get_scalar_data(run_name, tag_name)
 
             # Should have data points
             assert len(data.root) > 0
@@ -71,21 +75,22 @@ class TestTensorBoardIntegration:
             assert hasattr(first_datum, "step")
             assert hasattr(first_datum, "value")
 
-    def test_multiple_runs_and_tags(self, tensorboard_server):
+    @pytest.mark.asyncio
+    async def test_multiple_runs_and_tags(self, tensorboard_server):
         """Test handling multiple runs and their scalar tags."""
         server_url = tensorboard_server("tacotron2-melvyn-bragg")
 
-        with TensorBoardClient(server_url) as client:
-            runs = client.get_runs()
+        async with TensorBoardClient(server_url) as client:
+            runs = await client.get_runs()
 
             # Test each run
             for run_name in runs.runs:
-                tags = client.get_scalar_tags(run_name)
+                tags = await client.get_scalar_tags(run_name)
 
                 if run_name in tags.root and tags.root[run_name]:
                     # Get data for first available tag
                     tag_name = list(tags.root[run_name].keys())[0]
-                    data = client.get_scalar_data(run_name, tag_name)
+                    data = await client.get_scalar_data(run_name, tag_name)
 
                     # Verify data structure
                     assert len(data.root) >= 0  # May be empty for some tags

@@ -12,7 +12,7 @@ dependencies = [
     "textual-plot",
     "tensorboard",
     "pydantic",
-    "requests"
+    "httpx"
 ]
 
 [project.scripts]
@@ -23,6 +23,7 @@ dev = [
     "pre-commit",
     "textual-dev",
     "pytest",
+    "pytest-asyncio",
     "coverage",
     "pytest-cov",
     "build",

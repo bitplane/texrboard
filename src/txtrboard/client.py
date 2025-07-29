@@ -1,4 +1,4 @@
-import requests
+import httpx
 from typing import Optional, Dict
 from urllib.parse import urljoin
 from txtrboard.models.tensorboard import (
@@ -53,9 +53,9 @@ class TensorBoardClient:
         """
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
-        self.session = requests.Session()
+        self.client = httpx.AsyncClient(timeout=timeout)
 
-    def _make_request(self, endpoint: str, params: Optional[Dict] = None) -> requests.Response:
+    async def _make_request(self, endpoint: str, params: Optional[Dict] = None) -> httpx.Response:
         """Make HTTP request to TensorBoard API.
 
         Args:
@@ -72,53 +72,53 @@ class TensorBoardClient:
         url = urljoin(self.base_url + "/", endpoint.lstrip("/"))
 
         try:
-            response = self.session.get(url, params=params, timeout=self.timeout)
+            response = await self.client.get(url, params=params)
             response.raise_for_status()
             return response
-        except requests.exceptions.ConnectionError as e:
+        except httpx.ConnectError as e:
             raise TensorBoardConnectionError(f"Unable to connect to TensorBoard at {self.base_url}: {e}")
-        except requests.exceptions.Timeout as e:
+        except httpx.TimeoutException as e:
             raise TensorBoardConnectionError(f"Request timeout connecting to TensorBoard: {e}")
-        except requests.exceptions.HTTPError as e:
+        except httpx.HTTPStatusError as e:
             raise TensorBoardAPIError(f"TensorBoard API error: {e}")
 
-    def get_environment(self) -> EnvironmentResponse:
+    async def get_environment(self) -> EnvironmentResponse:
         """Get TensorBoard environment information.
 
         Returns:
             Environment response with version and data location
         """
-        response = self._make_request("/data/environment")
+        response = await self._make_request("/data/environment")
         return EnvironmentResponse(**response.json())
 
-    def get_logdir(self) -> LogdirResponse:
+    async def get_logdir(self) -> LogdirResponse:
         """Get the log directory being served by TensorBoard.
 
         Returns:
             Logdir response with directory path
         """
-        response = self._make_request("/data/logdir")
+        response = await self._make_request("/data/logdir")
         return LogdirResponse(**response.json())
 
-    def get_runs(self) -> RunsResponse:
+    async def get_runs(self) -> RunsResponse:
         """Get list of all runs known to TensorBoard.
 
         Returns:
             Runs response with list of run names
         """
-        response = self._make_request("/data/runs")
+        response = await self._make_request("/data/runs")
         return RunsResponse(runs=response.json())
 
-    def get_plugins_listing(self) -> PluginsListingResponse:
+    async def get_plugins_listing(self) -> PluginsListingResponse:
         """Get available plugins and their paths.
 
         Returns:
             Plugins listing response
         """
-        response = self._make_request("/data/plugins_listing")
+        response = await self._make_request("/data/plugins_listing")
         return PluginsListingResponse(response.json())
 
-    def get_scalar_tags(self, run: str) -> ScalarTagsResponse:
+    async def get_scalar_tags(self, run: str) -> ScalarTagsResponse:
         """Get scalar tags for a specific run.
 
         Args:
@@ -127,10 +127,10 @@ class TensorBoardClient:
         Returns:
             Scalar tags response with tag information
         """
-        response = self._make_request("/data/plugin/scalars/tags", params={"run": run})
+        response = await self._make_request("/data/plugin/scalars/tags", params={"run": run})
         return ScalarTagsResponse(response.json())
 
-    def get_scalar_data(self, run: str, tag: str, format: str = "JSON") -> ScalarDataResponse:
+    async def get_scalar_data(self, run: str, tag: str, format: str = "JSON") -> ScalarDataResponse:
         """Get scalar data for a specific run and tag.
 
         Args:
@@ -142,19 +142,19 @@ class TensorBoardClient:
             Scalar data response with time series data
         """
         params = {"run": run, "tag": tag, "format": format}
-        response = self._make_request("/data/plugin/scalars/scalars", params=params)
+        response = await self._make_request("/data/plugin/scalars/scalars", params=params)
         return ScalarDataResponse(response.json())
 
-    def get_image_tags(self) -> ImageTagsResponse:
+    async def get_image_tags(self) -> ImageTagsResponse:
         """Get image tags for all runs.
 
         Returns:
             Image tags response
         """
-        response = self._make_request("/data/plugin/images/tags")
+        response = await self._make_request("/data/plugin/images/tags")
         return ImageTagsResponse(response.json())
 
-    def get_image_data(self, run: str, tag: str, sample: int = 0) -> ImageDataResponse:
+    async def get_image_data(self, run: str, tag: str, sample: int = 0) -> ImageDataResponse:
         """Get image metadata for a specific run and tag.
 
         Args:
@@ -166,19 +166,19 @@ class TensorBoardClient:
             Image data response with metadata
         """
         params = {"run": run, "tag": tag, "sample": sample}
-        response = self._make_request("/data/plugin/images/images", params=params)
+        response = await self._make_request("/data/plugin/images/images", params=params)
         return ImageDataResponse(response.json())
 
-    def get_audio_tags(self) -> AudioTagsResponse:
+    async def get_audio_tags(self) -> AudioTagsResponse:
         """Get audio tags for all runs.
 
         Returns:
             Audio tags response
         """
-        response = self._make_request("/data/plugin/audio/tags")
+        response = await self._make_request("/data/plugin/audio/tags")
         return AudioTagsResponse(response.json())
 
-    def get_audio_data(self, run: str, tag: str, sample: int = 0) -> AudioDataResponse:
+    async def get_audio_data(self, run: str, tag: str, sample: int = 0) -> AudioDataResponse:
         """Get audio metadata for a specific run and tag.
 
         Args:
@@ -190,19 +190,19 @@ class TensorBoardClient:
             Audio data response with metadata
         """
         params = {"run": run, "tag": tag, "sample": sample}
-        response = self._make_request("/data/plugin/audio/audio", params=params)
+        response = await self._make_request("/data/plugin/audio/audio", params=params)
         return AudioDataResponse(response.json())
 
-    def get_distribution_tags(self) -> DistributionTagsResponse:
+    async def get_distribution_tags(self) -> DistributionTagsResponse:
         """Get distribution/histogram tags for all runs.
 
         Returns:
             Distribution tags response
         """
-        response = self._make_request("/data/plugin/distributions/tags")
+        response = await self._make_request("/data/plugin/distributions/tags")
         return DistributionTagsResponse(response.json())
 
-    def get_distribution_data(self, run: str, tag: str) -> DistributionDataResponse:
+    async def get_distribution_data(self, run: str, tag: str) -> DistributionDataResponse:
         """Get distribution data for a specific run and tag.
 
         Args:
@@ -213,19 +213,19 @@ class TensorBoardClient:
             Distribution data response with histogram data
         """
         params = {"run": run, "tag": tag}
-        response = self._make_request("/data/plugin/distributions/distributions", params=params)
+        response = await self._make_request("/data/plugin/distributions/distributions", params=params)
         return DistributionDataResponse(response.json())
 
-    def get_text_tags(self) -> TextTagsResponse:
+    async def get_text_tags(self) -> TextTagsResponse:
         """Get text tags for all runs.
 
         Returns:
             Text tags response
         """
-        response = self._make_request("/data/plugin/text/tags")
+        response = await self._make_request("/data/plugin/text/tags")
         return TextTagsResponse(response.json())
 
-    def get_text_data(self, run: str, tag: str) -> TextDataResponse:
+    async def get_text_data(self, run: str, tag: str) -> TextDataResponse:
         """Get text data for a specific run and tag.
 
         Args:
@@ -236,17 +236,17 @@ class TensorBoardClient:
             Text data response
         """
         params = {"run": run, "tag": tag}
-        response = self._make_request("/data/plugin/text/text", params=params)
+        response = await self._make_request("/data/plugin/text/text", params=params)
         return TextDataResponse(response.json())
 
-    def close(self):
-        """Close the HTTP session."""
-        self.session.close()
+    async def close(self):
+        """Close the HTTP client."""
+        await self.client.aclose()
 
-    def __enter__(self):
-        """Context manager entry."""
+    async def __aenter__(self):
+        """Async context manager entry."""
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Context manager exit."""
-        self.close()
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit."""
+        await self.close()
