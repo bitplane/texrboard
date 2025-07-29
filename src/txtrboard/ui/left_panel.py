@@ -33,18 +33,18 @@ class LeftPanel(Container):
     def on_mount(self) -> None:
         """When panel is mounted, check if we have a client and load runs."""
         if self._client:
-            self.update_runs(self._client)
+            self.call_later(self.update_runs, self._client)
 
     def set_client(self, client: TensorBoardClient) -> None:
         """Set the TensorBoard client and trigger an update."""
         self._client = client
         if self.is_mounted:
-            self.update_runs(client)
+            self.call_later(self.update_runs, client)
 
-    def update_runs(self, client: TensorBoardClient):
+    async def update_runs(self, client: TensorBoardClient):
         """Update the runs section with data from TensorBoard."""
         try:
-            runs = client.get_runs()
+            runs = await client.get_runs()
             self.runs_data = runs.runs
             log.info(f"Got runs: {runs.runs}")
 

@@ -17,6 +17,7 @@ from txtrboard.models.tensorboard import (
     TextTagsResponse,
     TextDataResponse,
 )
+from txtrboard.logging_config import get_logger
 
 
 class TensorBoardClientError(Exception):
@@ -51,9 +52,11 @@ class TensorBoardClient:
             base_url: Base URL of TensorBoard server (default: http://localhost:6006)
             timeout: Request timeout in seconds
         """
+        self.logger = get_logger(__name__)
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self.client = httpx.AsyncClient(timeout=timeout)
+        self.logger.info(f"TensorBoardClient initialized with URL: {self.base_url}")
 
     async def _make_request(self, endpoint: str, params: Optional[Dict] = None) -> httpx.Response:
         """Make HTTP request to TensorBoard API.
@@ -106,8 +109,16 @@ class TensorBoardClient:
         Returns:
             Runs response with list of run names
         """
+        self.logger.debug("get_runs() called")
         response = await self._make_request("/data/runs")
-        return RunsResponse(runs=response.json())
+        self.logger.debug(f"get_runs() got response: {type(response)}")
+
+        json_data = response.json()
+        self.logger.debug(f"get_runs() response.json(): {type(json_data)}, value: {json_data}")
+
+        runs_response = RunsResponse(runs=json_data)
+        self.logger.debug(f"get_runs() returning RunsResponse: {type(runs_response)}, runs: {runs_response.runs}")
+        return runs_response
 
     async def get_plugins_listing(self) -> PluginsListingResponse:
         """Get available plugins and their paths.

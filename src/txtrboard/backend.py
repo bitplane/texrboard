@@ -8,6 +8,7 @@ on a timer using set_interval().
 from typing import List, Optional, Protocol
 from txtrboard.client import TensorBoardClient, TensorBoardConnectionError, TensorBoardAPIError
 from txtrboard.messages import RunsListUpdated, ConnectionStatusChanged
+from txtrboard.logging_config import get_logger
 
 
 class MessagePump(Protocol):
@@ -43,6 +44,9 @@ class Backend:
             message_pump: Object that can receive messages (typically the App)
             base_url: TensorBoard server URL
         """
+        self.logger = get_logger(__name__)
+        self.logger.info(f"Backend initializing with URL: {base_url}")
+
         self.message_pump = message_pump
         self.base_url = base_url
 
@@ -61,13 +65,25 @@ class Backend:
         set_interval(). It checks for changes in runs list and connection status,
         dispatching appropriate messages when changes are detected.
         """
+        self.logger.debug("Starting poll_updates")
         try:
             # Fetch current runs
+            self.logger.debug(f"Calling client.get_runs() - client type: {type(self.client)}")
             runs_response = await self.client.get_runs()
-            current_runs = runs_response.runs
+            self.logger.debug(f"Got runs_response type: {type(runs_response)}, value: {runs_response}")
+
+            if hasattr(runs_response, "runs"):
+                current_runs = runs_response.runs
+                self.logger.debug(f"Current runs: {current_runs}")
+            else:
+                self.logger.error(
+                    f"runs_response has no 'runs' attribute! Type: {type(runs_response)}, Dir: {dir(runs_response)}"
+                )
+                return
 
             # Check if runs list changed
             if self._cached_runs != current_runs:
+                self.logger.info(f"Runs changed from {self._cached_runs} to {current_runs}")
                 self._cached_runs = current_runs.copy()
 
                 # Dispatch update message
@@ -76,6 +92,7 @@ class Backend:
 
             # Update connection status if needed
             if not self._connected or self._last_error:
+                self.logger.info("Connection status updated to connected")
                 self._connected = True
                 self._last_error = ""
 
@@ -85,9 +102,11 @@ class Backend:
 
         except (TensorBoardConnectionError, TensorBoardAPIError) as e:
             error_msg = str(e)
+            self.logger.error(f"Polling error: {error_msg}")
 
             # Update connection status if needed
             if self._connected or self._last_error != error_msg:
+                self.logger.info(f"Connection status updated to disconnected: {error_msg}")
                 self._connected = False
                 self._last_error = error_msg
 
@@ -97,6 +116,7 @@ class Backend:
 
     async def cleanup(self) -> None:
         """Clean up resources on shutdown."""
+        self.logger.info("Backend cleanup - closing client")
         await self.client.close()
 
     # Properties for accessing cached data
