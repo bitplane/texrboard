@@ -9,7 +9,8 @@ from pathlib import Path
 from typing import Optional
 
 from textual.app import App, ComposeResult
-from textual.widgets import Footer, TabbedContent, TabPane, Static, Button
+from textual.widgets import Footer, Static, Button, Tabs
+from textual.containers import Horizontal, Container
 from textual import log
 
 from txtrboard.client import TensorBoardClient, TensorBoardConnectionError
@@ -36,19 +37,16 @@ class TextBoardApp(App):
 
     def compose(self) -> ComposeResult:
         yield TextBoardHeader()
-        yield LeftPanel()
 
-        with TabbedContent():
-            with TabPane("SCALARS", id="scalars-tab"):
+        with Horizontal(id="main-content"):
+            yield LeftPanel()
+            with Container(id="content-area"):
                 yield Static("Scalar plots will go here", id="scalars-content")
-
-            with TabPane("IMAGES", id="images-tab"):
+            with Container(id="content-area-images", classes="hidden"):
                 yield Static("Image displays will go here", id="images-content")
-
-            with TabPane("HISTOGRAMS", id="histograms-tab"):
+            with Container(id="content-area-histograms", classes="hidden"):
                 yield Static("Histogram plots will go here", id="histograms-content")
-
-            with TabPane("GRAPHS", id="graphs-tab"):
+            with Container(id="content-area-graphs", classes="hidden"):
                 yield Static("Graph visualization will go here", id="graphs-content")
 
         yield Footer()
@@ -82,6 +80,33 @@ class TextBoardApp(App):
             if self.client:
                 left_panel = self.query_one(LeftPanel)
                 left_panel.update_runs(self.client)
+
+    def on_tabs_tab_activated(self, event: Tabs.TabActivated) -> None:
+        """Handle tab switching."""
+        # Hide all content area containers
+        content_containers = ["content-area", "content-area-images", "content-area-histograms", "content-area-graphs"]
+        for container_id in content_containers:
+            try:
+                container = self.query_one(f"#{container_id}")
+                container.add_class("hidden")
+            except Exception:
+                pass
+
+        # Show the selected content area container based on tab label
+        tab_label = str(event.tab.label).upper()
+        label_to_container = {
+            "SCALARS": "content-area",
+            "IMAGES": "content-area-images",
+            "HISTOGRAMS": "content-area-histograms",
+            "GRAPHS": "content-area-graphs",
+        }
+
+        if tab_label in label_to_container:
+            try:
+                container = self.query_one(f"#{label_to_container[tab_label]}")
+                container.remove_class("hidden")
+            except Exception:
+                pass
 
     def cleanup(self):
         """Clean up resources."""

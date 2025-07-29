@@ -21,6 +21,7 @@ txtrboard = "txtrboard.cli:main"
 [project.optional-dependencies]
 dev = [
     "pre-commit",
+    "textual-dev",
     "pytest",
     "coverage",
     "pytest-cov",

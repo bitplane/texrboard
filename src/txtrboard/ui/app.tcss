@@ -1,44 +1,81 @@
 /* TextBoard App CSS */
 
-/* Header Styles */
-TextBoardHeader {
-    dock: top;
-    height: 3;
-    background: $surface;
-    border-bottom: solid $primary;
+/* Hide scrollbars */
+Screen {
+    overflow: hidden;
+    scrollbar-size: 0 0;
 }
 
-TextBoardHeader Horizontal {
+/* Header Styles */
+TextBoardHeader {
     height: 3;
+    background: $primary;
+    color: white;
+}
+
+#header-content {
+    height: 100%;
     width: 100%;
+    align: center middle;
 }
 
 #app-title {
-    padding: 0 2;
+    padding: 1 2;
     text-style: bold;
+    color: white;
+    width: auto;
+}
+
+#main-tabs {
+    height: 3;
+    padding: 1 3;
+    background: $primary;
+    width: 80%;
+    layout: horizontal;
+}
+
+#main-tabs Underline {
+    display: none;
+}
+
+#main-tabs Tab {
+    background: $primary;
+    color: white;
+    border: none;
+    height: 1;
+    padding: 0 2 0 0;
+    width: auto;
+}
+
+#main-tabs Tab.-active {
+    background: white;
     color: $primary;
 }
 
-RightControls {
+#right-controls {
     dock: right;
     width: auto;
-    height: 3;
-}
-
-RightControls Horizontal {
     height: 3;
     align: center middle;
 }
 
-RightControls Button {
+#right-controls Button {
     margin: 0 1;
+    padding: 0 0;
     min-width: 3;
-    height: 1;
+    height: 3;
+    color: white;
+    border: none;
+}
+
+
+/* Main Content Layout */
+#main-content {
+    height: 100%;
 }
 
 /* Left Panel Styles */
 LeftPanel {
-    dock: left;
     width: 25%;
     border-right: solid $primary;
 }
@@ -54,7 +91,24 @@ LeftPanel {
     padding: 1;
 }
 
-/* Main Content Styles */
-TabbedContent {
-    margin: 1;
+/* Content Area Styles */
+#content-area,
+#content-area-images,
+#content-area-histograms,
+#content-area-graphs {
+    width: 75%;
+    padding: 1;
+}
+
+#content-area Static,
+#content-area-images Static,
+#content-area-histograms Static,
+#content-area-graphs Static {
+    width: 100%;
+    height: 100%;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none;
 }

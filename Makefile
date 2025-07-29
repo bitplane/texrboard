@@ -1,6 +1,6 @@
 # the things that don't have output files or run every time
 .PHONY: help all install test dev coverage clean \
-		pre-commit update-pre-commit fix-terminal
+		pre-commit update-pre-commit fix-terminal dev-run
 
 
 PROJECT_NAME := txtrboard
@@ -36,6 +36,10 @@ release: scripts/release.sh ## publish to pypi
 
 fix-terminal: scripts/fix-terminal.sh ## reset terminal state after TUI apps mess it up
 	scripts/fix-terminal.sh
+
+dev-run: .venv/.installed-dev ## run the app in development mode with auto-restart
+	textual run --dev txtrboard.ui.app:TextBoardApp
+
 
 # Caching doesn't work if we depend on PHONY targets
 
