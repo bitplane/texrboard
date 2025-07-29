@@ -1,0 +1,60 @@
+/* TextBoard App CSS */
+
+/* Header Styles */
+TextBoardHeader {
+    dock: top;
+    height: 3;
+    background: $surface;
+    border-bottom: solid $primary;
+}
+
+TextBoardHeader Horizontal {
+    height: 3;
+    width: 100%;
+}
+
+#app-title {
+    padding: 0 2;
+    text-style: bold;
+    color: $primary;
+}
+
+RightControls {
+    dock: right;
+    width: auto;
+    height: 3;
+}
+
+RightControls Horizontal {
+    height: 3;
+    align: center middle;
+}
+
+RightControls Button {
+    margin: 0 1;
+    min-width: 3;
+    height: 1;
+}
+
+/* Left Panel Styles */
+LeftPanel {
+    dock: left;
+    width: 25%;
+    border-right: solid $primary;
+}
+
+#context-controls {
+    height: 50%;
+    border-bottom: solid $primary;
+    padding: 1;
+}
+
+#runs-section {
+    height: 50%;
+    padding: 1;
+}
+
+/* Main Content Styles */
+TabbedContent {
+    margin: 1;
+}
