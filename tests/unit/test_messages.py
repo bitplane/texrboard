@@ -1,32 +1,5 @@
 from textual.message import Message
-from txtrboard.messages import RunsListUpdated, ConnectionStatusChanged, RefreshRequested, RefreshIntervalChanged
-
-
-def test_runs_list_updated_message_creation():
-    """Test creating RunsListUpdated message with runs list."""
-    runs = ["train", "eval", "test"]
-    message = RunsListUpdated(runs)
-
-    assert isinstance(message, Message)
-    assert message.runs == runs
-    assert message.runs is runs  # Should store the exact list reference
-
-
-def test_runs_list_updated_empty_runs_list():
-    """Test creating message with empty runs list."""
-    message = RunsListUpdated([])
-
-    assert message.runs == []
-    assert len(message.runs) == 0
-
-
-def test_runs_list_updated_single_run():
-    """Test creating message with single run."""
-    runs = ["single_run"]
-    message = RunsListUpdated(runs)
-
-    assert message.runs == ["single_run"]
-    assert len(message.runs) == 1
+from txtrboard.messages import ConnectionStatusChanged, RefreshRequested, RefreshIntervalChanged
 
 
 def test_connection_status_changed_connection_established():

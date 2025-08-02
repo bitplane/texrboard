@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 from txtrboard.backend import Backend
 from txtrboard.client import TensorBoardConnectionError, TensorBoardAPIError
-from txtrboard.messages import RunsListUpdated, ConnectionStatusChanged
+from txtrboard.messages import ConnectionStatusChanged
 from txtrboard.models.tensorboard import RunsResponse
 
 
@@ -11,9 +11,13 @@ class MockMessagePump:
 
     def __init__(self):
         self.messages = []
+        self.data_changed_calls = 0
 
     def post_message(self, message) -> None:
         self.messages.append(message)
+
+    def on_data_changed(self) -> None:
+        self.data_changed_calls += 1
 
 
 def test_backend_initialization():
@@ -54,16 +58,12 @@ async def test_successful_polling():
     assert backend.is_connected is True
     assert backend.last_error == ""
 
-    # Check messages sent
-    assert len(message_pump.messages) == 2
+    # Check data changed callback was called
+    assert message_pump.data_changed_calls == 1
 
-    # First message should be runs update
-    runs_msg = message_pump.messages[0]
-    assert isinstance(runs_msg, RunsListUpdated)
-    assert runs_msg.runs == mock_runs
-
-    # Second message should be connection status
-    conn_msg = message_pump.messages[1]
+    # Check only connection status message sent (no more data messages)
+    assert len(message_pump.messages) == 1
+    conn_msg = message_pump.messages[0]
     assert isinstance(conn_msg, ConnectionStatusChanged)
     assert conn_msg.connected is True
     assert conn_msg.error == ""
@@ -82,15 +82,17 @@ async def test_runs_list_change_detection():
     with patch.object(backend.client, "get_runs", return_value=mock_response1):
         await backend.poll_updates()
 
-    # Clear messages
+    # Clear messages and reset callback counter
     message_pump.messages.clear()
+    initial_callback_calls = message_pump.data_changed_calls
 
     # Second poll with same runs - should not trigger runs update
     with patch.object(backend.client, "get_runs", return_value=mock_response1):
         await backend.poll_updates()
 
-    # Should have no messages since nothing changed
+    # Should have no messages and no additional callbacks since nothing changed
     assert len(message_pump.messages) == 0
+    assert message_pump.data_changed_calls == initial_callback_calls
 
     # Third poll with different runs - should trigger update
     new_runs = ["train", "eval", "test"]
@@ -99,11 +101,11 @@ async def test_runs_list_change_detection():
     with patch.object(backend.client, "get_runs", return_value=mock_response2):
         await backend.poll_updates()
 
-    # Should have runs update message
-    assert len(message_pump.messages) == 1
-    runs_msg = message_pump.messages[0]
-    assert isinstance(runs_msg, RunsListUpdated)
-    assert runs_msg.runs == new_runs
+    # Should have one additional data changed callback
+    assert message_pump.data_changed_calls == initial_callback_calls + 1
+
+    # No messages should be sent for data changes
+    assert len(message_pump.messages) == 0
 
 
 @pytest.mark.asyncio
@@ -200,20 +202,24 @@ async def test_multiple_polls_same_data():
     mock_response = RunsResponse(runs=mock_runs)
 
     with patch.object(backend.client, "get_runs", return_value=mock_response):
-        # First poll - should generate messages
+        # First poll - should generate connection message and data callback
         await backend.poll_updates()
-        assert len(message_pump.messages) == 2  # runs + connection
+        assert len(message_pump.messages) == 1  # connection only
+        assert message_pump.data_changed_calls == 1  # data callback
 
-        # Clear messages
+        # Clear messages (but keep callback count)
         message_pump.messages.clear()
+        initial_callback_calls = message_pump.data_changed_calls
 
-        # Second poll - should not generate messages
+        # Second poll - should not generate messages or callbacks (no changes)
         await backend.poll_updates()
         assert len(message_pump.messages) == 0
+        assert message_pump.data_changed_calls == initial_callback_calls
 
-        # Third poll - should not generate messages
+        # Third poll - should not generate messages or callbacks (no changes)
         await backend.poll_updates()
         assert len(message_pump.messages) == 0
+        assert message_pump.data_changed_calls == initial_callback_calls
 
 
 @pytest.mark.asyncio
@@ -247,4 +253,5 @@ async def test_connection_recovery():
     # Should be connected again
     assert backend.is_connected is True
     assert backend.last_error == ""
-    assert len(message_pump.messages) == 2  # runs + connection recovered
+    assert len(message_pump.messages) == 1  # connection recovered only
+    assert message_pump.data_changed_calls == 1  # data callback

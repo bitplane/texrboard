@@ -5,9 +5,10 @@ and data caching. The Textual app is responsible for calling poll_updates()
 on a timer using set_interval().
 """
 
-from typing import List, Optional, Protocol
+from typing import List, Optional, Protocol, Tuple
+from functools import lru_cache
 from txtrboard.client import TensorBoardClient, TensorBoardConnectionError, TensorBoardAPIError
-from txtrboard.messages import RunsListUpdated, ConnectionStatusChanged
+from txtrboard.messages import ConnectionStatusChanged
 from txtrboard.logging_config import get_logger
 
 
@@ -57,6 +58,7 @@ class Backend:
         self._cached_runs: Optional[List[str]] = None
         self._connected = False
         self._last_error = ""
+        self._cache_version = 0  # Increment to invalidate lru_cache
 
     async def poll_updates(self) -> None:
         """Poll TensorBoard for updates and dispatch messages if changes detected.
@@ -85,10 +87,13 @@ class Backend:
             if self._cached_runs != current_runs:
                 self.logger.info(f"Runs changed from {self._cached_runs} to {current_runs}")
                 self._cached_runs = current_runs.copy()
+                self._cache_version += 1  # Invalidate lru_cache
 
-                # Dispatch update message
-                message = RunsListUpdated(current_runs)
-                self.message_pump.post_message(message)
+                # Notify the message pump that data changed (App will update reactives)
+                # We could create a minimal DataChanged message or use a callback
+                # For now, let's use a simple callback approach
+                if hasattr(self.message_pump, "on_data_changed"):
+                    self.message_pump.on_data_changed()
 
             # Update connection status if needed
             if not self._connected or self._last_error:
@@ -125,6 +130,15 @@ class Backend:
         """Get the cached runs list."""
         return self._cached_runs.copy() if self._cached_runs else None
 
+    @lru_cache(maxsize=32)
+    def get_runs_tuple(self, cache_version: int) -> Tuple[str, ...]:
+        """Get runs as immutable tuple, cached by version."""
+        return tuple(self._cached_runs) if self._cached_runs else ()
+
+    def get_current_runs_tuple(self) -> Tuple[str, ...]:
+        """Get current runs as immutable tuple."""
+        return self.get_runs_tuple(self._cache_version)
+
     @property
     def is_connected(self) -> bool:
         """Check if currently connected to TensorBoard."""
@@ -134,3 +148,8 @@ class Backend:
     def last_error(self) -> str:
         """Get the last connection error message."""
         return self._last_error
+
+    @property
+    def cache_version(self) -> int:
+        """Get current cache version for reactive updates."""
+        return self._cache_version

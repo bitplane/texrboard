@@ -13,11 +13,12 @@ from textual.widgets import Footer, Static, Button, Tabs
 from textual.containers import Horizontal, Container
 from textual import log
 from textual.timer import Timer
+from textual.reactive import reactive
 
 from txtrboard.client import TensorBoardClient
 from txtrboard.server import TensorBoardManager
 from txtrboard.backend import Backend
-from txtrboard.messages import RefreshRequested, RefreshIntervalChanged, RunsListUpdated, ConnectionStatusChanged
+from txtrboard.messages import RefreshRequested, RefreshIntervalChanged, ConnectionStatusChanged
 from txtrboard.logging_config import get_logger
 from txtrboard.ui.theme import register_themes, get_default_theme
 from txtrboard.ui.left_panel import LeftPanel
@@ -29,6 +30,9 @@ class TextBoardApp(App):
 
     # Load CSS from external file
     CSS_PATH = Path(__file__).parent / "app.tcss"
+
+    # Reactive data that components can watch
+    runs_data = reactive(tuple())
 
     def get_theme_variable_defaults(self) -> dict[str, str]:
         """Define custom theme variables."""
@@ -95,6 +99,12 @@ class TextBoardApp(App):
         # Initial title
         self.title = "TextBoard"
 
+    def on_data_changed(self) -> None:
+        """Callback from Backend when data changes."""
+        if self.backend:
+            self.logger.debug("Data changed callback - updating reactive")
+            self.runs_data = self.backend.get_current_runs_tuple()
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button clicks."""
         if event.button.id == "theme-btn":
@@ -158,17 +168,7 @@ class TextBoardApp(App):
         else:
             self.logger.warning("Interval changed but backend is None")
 
-    def on_runs_list_updated(self, message: RunsListUpdated) -> None:
-        """Handle backend data updates."""
-        self.logger.info(f"Runs updated: {len(message.runs)} runs")
-        log.info(f"Runs updated: {len(message.runs)} runs")
-
-        # Update left panel with new runs data
-        if self.client:
-            left_panel = self.query_one(LeftPanel)
-            self.call_later(left_panel.update_runs, self.client)
-        else:
-            self.logger.warning("Runs updated but client is None")
+    # RunsListUpdated message handler removed - now using callback + reactive pattern
 
     def on_connection_status_changed(self, message: ConnectionStatusChanged) -> None:
         """Handle connection status changes."""

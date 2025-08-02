@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import AsyncMock, Mock, patch
 from textual.widgets import Button, Select
 from txtrboard.ui.app import TextBoardApp
-from txtrboard.messages import RunsListUpdated, ConnectionStatusChanged
+from txtrboard.messages import ConnectionStatusChanged
 
 
 @pytest.mark.asyncio
@@ -57,27 +57,25 @@ async def test_full_message_flow_interval_change():
 
 
 @pytest.mark.asyncio
-async def test_backend_data_message_flow():
-    """Test that backend data messages flow to app handlers."""
+async def test_backend_reactive_data_flow():
+    """Test that backend data flows through reactive system."""
     with patch("txtrboard.ui.app.Backend") as mock_backend_class:
         # Setup mock backend
         mock_backend = Mock()
         mock_backend.poll_updates = AsyncMock()
+        mock_backend.get_current_runs_tuple = Mock(return_value=("train", "eval", "test"))
         mock_backend_class.return_value = mock_backend
 
         app = TextBoardApp()
         async with app.run_test() as pilot:
-            # Simulate backend sending runs update message
-            runs = ["train", "eval", "test"]
-            app.post_message(RunsListUpdated(runs))
+            # Simulate backend data change callback
+            app.on_data_changed()
 
-            # Allow message processing
+            # Allow processing
             await pilot.pause()
 
-            # Verify app received and processed the message
-            # (This would typically update the UI - we can't easily test that,
-            # but we can verify the message was processed without error)
-            assert True  # If we get here, message was handled without exception
+            # Verify app's reactive data was updated
+            assert app.runs_data == ("train", "eval", "test")
 
 
 @pytest.mark.asyncio

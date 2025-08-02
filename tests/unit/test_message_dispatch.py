@@ -1,39 +1,7 @@
 import pytest
 from textual.app import App
 from textual.widget import Widget
-from txtrboard.messages import RunsListUpdated, ConnectionStatusChanged, RefreshRequested, RefreshIntervalChanged
-
-
-@pytest.mark.asyncio
-async def test_runs_list_updated_dispatch():
-    """Test that RunsListUpdated message can be dispatched and handled."""
-    received_message = None
-
-    class TestWidget(Widget):
-        def on_runs_list_updated(self, message: RunsListUpdated) -> None:
-            nonlocal received_message
-            received_message = message
-
-    class TestApp(App):
-        def compose(self):
-            yield TestWidget()
-
-    app = TestApp()
-    async with app.run_test() as pilot:
-        # Get the widget
-        widget = app.query_one(TestWidget)
-
-        # Dispatch the message
-        runs = ["train", "eval", "test"]
-        message = RunsListUpdated(runs)
-        widget.post_message(message)
-
-        # Give the message time to be processed
-        await pilot.pause()
-
-        # Verify the message was received
-        assert received_message is not None
-        assert received_message.runs == runs
+from txtrboard.messages import ConnectionStatusChanged, RefreshRequested, RefreshIntervalChanged
 
 
 @pytest.mark.asyncio
@@ -75,7 +43,7 @@ async def test_message_bubbling():
     received_at_widget = None
 
     class TestWidget(Widget):
-        def on_runs_list_updated(self, message: RunsListUpdated) -> None:
+        def on_connection_status_changed(self, message: ConnectionStatusChanged) -> None:
             nonlocal received_at_widget
             received_at_widget = message
             # Don't prevent bubbling
@@ -84,7 +52,7 @@ async def test_message_bubbling():
         def compose(self):
             yield TestWidget()
 
-        def on_runs_list_updated(self, message: RunsListUpdated) -> None:
+        def on_connection_status_changed(self, message: ConnectionStatusChanged) -> None:
             nonlocal received_at_app
             received_at_app = message
 
@@ -94,8 +62,7 @@ async def test_message_bubbling():
         widget = app.query_one(TestWidget)
 
         # Dispatch the message
-        runs = ["single_run"]
-        message = RunsListUpdated(runs)
+        message = ConnectionStatusChanged(connected=True)
         widget.post_message(message)
 
         # Give the message time to be processed
@@ -103,9 +70,9 @@ async def test_message_bubbling():
 
         # Verify the message was received at both levels
         assert received_at_widget is not None
-        assert received_at_widget.runs == runs
+        assert received_at_widget.connected is True
         assert received_at_app is not None
-        assert received_at_app.runs == runs
+        assert received_at_app.connected is True
 
 
 @pytest.mark.asyncio

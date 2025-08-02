@@ -6,27 +6,9 @@ and user interactions.
 """
 
 from textual.message import Message
-from typing import List
 
 
 # Backend data update messages
-class RunsListUpdated(Message):
-    """Dispatched when the TensorBoard runs list changes.
-
-    This message is sent when the background poller detects
-    that new runs have been added or existing runs removed.
-    """
-
-    def __init__(self, runs: List[str]) -> None:
-        """Initialize the runs list update message.
-
-        Args:
-            runs: Current list of run names from TensorBoard
-        """
-        self.runs = runs
-        super().__init__()
-
-
 class ConnectionStatusChanged(Message):
     """Dispatched when TensorBoard connection status changes.
 
